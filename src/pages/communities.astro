@@ -1,0 +1,47 @@
+---
+import HomeLayout from '../layouts/HomeLayout.astro';
+import CommunityCard from '../components/CommunityCard.astro';
+import subscribedCommunities from '../data/subscribed_communities.json';
+import siteConfig from '../config/site.config.json';
+import ActiveCommunitiesSidebar from '../components/ActiveCommunitiesSidebar.astro';
+
+const sortedCommunities = subscribedCommunities.sort((a, b) => b.subscribers - a.subscribers);
+const hiveUsername = siteConfig.hiveUsername;
+const avatarUrl = `https://images.hive.blog/u/${hiveUsername}/avatar`;
+const finalCoverUrl = `https://images.hive.blog/u/${hiveUsername}/cover`;
+---
+
+<HomeLayout title="Subscribed Communities" hiveUsername={hiveUsername} avatarUrl={avatarUrl} finalCoverUrl={finalCoverUrl} breadcrumbs={[{ label: 'Home', href: '/' }, { label: 'Communities', href: '/communities' }]}>
+  <Fragment slot="header">
+    <h1>Subscribed Communities</h1>
+  </Fragment>
+
+  <Fragment slot="hero">
+    <h2>Explore the communities you follow on Hive!</h2>
+  </Fragment>
+
+  <Fragment slot="posts">
+    <div class="communities-grid">
+      {sortedCommunities.map(community => (
+        <CommunityCard community={community} />
+      ))}
+    </div>
+  </Fragment>
+
+  <Fragment slot="sidebar">
+    <ActiveCommunitiesSidebar />
+  </Fragment>
+
+  <Fragment slot="footer">
+    <p>&copy; 2025 My Blog. All rights reserved.</p>
+  </Fragment>
+</HomeLayout>
+
+<style>
+  .communities-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+    padding: 1.5rem 0;
+  }
+</style>

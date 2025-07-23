@@ -1,0 +1,3 @@
+[submodule "lib/hiveblogkit"]
+	path = lib/hiveblogkit
+	url = https://github.com/quigua/HiveBlogKit.git

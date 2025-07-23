@@ -1,0 +1,9 @@
+[build]
+  command = "astro build"
+  publish = "dist"
+
+[build.processing]
+  submodules = true
+
+[functions]
+  directory = "netlify/functions"

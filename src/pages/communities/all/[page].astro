@@ -1,0 +1,93 @@
+---
+import HomeLayout from '../../../layouts/HomeLayout.astro';
+import allCommunities from '../../../data/all_communities.json';
+import CommunityCard from '../../../components/CommunityCard.astro';
+import siteConfig from '../../../config/site.config.json';
+
+export async function getStaticPaths({ paginate }) {
+  // Sort communities alphabetically by title
+  const sortedCommunities = allCommunities.sort((a, b) => b.subscribers - a.subscribers);
+
+  console.log('Number of communities in getStaticPaths:', sortedCommunities.length);
+
+  return paginate(sortedCommunities, { pageSize: 24 });
+}
+
+const { page = { currentPage: 1, url: { prev: null, next: null }, data: [] } } = Astro.props;
+
+console.log('Page object:', page);
+console.log('Page data:', page.data);
+
+const title = `All Communities - Page ${page.currentPage}`;
+const description = `Browse all communities on Hive, page ${page.currentPage}.`;
+
+const breadcrumbs = [
+  { label: 'Home', href: '/' },
+  { label: 'Communities', href: '/communities' },
+  { label: 'All Communities', href: '/communities/all' }
+];
+
+const hiveUsername = siteConfig.hiveUsername;
+const avatarUrl = `https://images.hive.blog/u/${hiveUsername}/avatar`;
+const finalCoverUrl = `https://images.hive.blog/u/${hiveUsername}/cover`;
+
+---
+
+<HomeLayout title={title} description={description} breadcrumbs={breadcrumbs} hiveUsername={hiveUsername} avatarUrl={avatarUrl} finalCoverUrl={finalCoverUrl}>
+  <Fragment slot="header">
+    <h1>All Communities</h1>
+  </Fragment>
+
+  <Fragment slot="hero">
+    <div class="community-detail-hero">
+      <img src={avatarUrl} alt="Blog Owner Avatar" class="community-detail-avatar" />
+      <h2>Discover Communities on Hive</h2>
+      <p>Explore all the communities available on the Hive blockchain.</p>
+    </div>
+  </Fragment>
+
+  <Fragment slot="posts">
+    <div class="communities-grid">
+      {page.data.map((community) => (
+        <CommunityCard community={community} />
+      ))}
+    </div>
+
+    <div class="pagination-controls">
+      {page.url.prev && <a href={page.url.prev} class="pagination-link">Previous</a>}
+      <span>Page {page.currentPage} of {page.lastPage}</span>
+      {page.url.next && <a href={page.url.next} class="pagination-link">Next</a>}
+    </div>
+  </Fragment>
+</HomeLayout>
+
+<style>
+  .communities-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1.5rem;
+    padding: 1.5rem 0;
+  }
+
+  .pagination-controls {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 2rem;
+  }
+
+  .pagination-link {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    text-decoration: none;
+    color: var(--color-background);
+    background-color: var(--color-accent);
+    font-weight: bold;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+  }
+
+  .pagination-link:hover {
+    background-color: var(--color-accent-dark);
+    transform: translateY(-2px);
+  }
+</style>

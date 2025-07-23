@@ -1,0 +1,158 @@
+---
+import HomeLayout from '../../layouts/HomeLayout.astro';
+import ActiveCommunitiesSidebar from '../../components/ActiveCommunitiesSidebar.astro';
+import PostCard from '../../components/PostCard.astro';
+
+import allCommunities from '../../data/all_communities.json';
+
+export const prerender = false;
+
+const { communityId } = Astro.params;
+const url = new URL(Astro.request.url);
+const page = parseInt(url.searchParams.get('page') || '1');
+const limit = 10; // Posts por página
+
+let communityDetails = null;
+let recentPosts = [];
+let errorMessage = null;
+
+// Find community details from local JSON (all_communities.json)
+const localCommunity = allCommunities.find(comm => comm.name === communityId);
+
+if (localCommunity) {
+  communityDetails = localCommunity;
+  try {
+    // Construct the base URL for the Netlify function
+    const netlifyFunctionBaseUrl = `${Astro.url.origin}/api/get-community-posts`;
+
+    // For pagination, we need to get posts from previous pages to find the correct start_author and start_permlink.
+    // This is inefficient, but necessary with the Hive API.
+    let allPostsForPagination = [];
+    if (page > 1) {
+      // Get all posts up to the current page to find the start_author/permlink
+      for (let i = 1; i < page; i++) {
+        const prevPostsResponse = await fetch(`${netlifyFunctionBaseUrl}?communityId=${communityId}&limit=${limit}${allPostsForPagination.length > 0 ? `&start_author=${allPostsForPagination[allPostsForPagination.length - 1].author}&start_permlink=${allPostsForPagination[allPostsForPagination.length - 1].permlink}` : ''}`);
+        const prevPosts = await prevPostsResponse.json();
+        allPostsForPagination = allPostsForPagination.concat(prevPosts);
+      }
+    }
+
+    const currentPostsResponse = await fetch(`${netlifyFunctionBaseUrl}?communityId=${communityId}&limit=${limit}${allPostsForPagination.length > 0 ? `&start_author=${allPostsForPagination[allPostsForPagination.length - 1].author}&start_permlink=${allPostsForPagination[allPostsForPagination.length - 1].permlink}` : ''}`);
+    recentPosts = await currentPostsResponse.json();
+
+  } catch (error) {
+    console.error(`Error fetching recent posts for ${communityId}:`, error);
+    errorMessage = "Error loading recent posts.";
+  }
+} else {
+  errorMessage = "Community not found.";
+}
+
+const title = communityDetails ? communityDetails.title : 'Community Not Found';
+const description = communityDetails ? communityDetails.description : 'Details for this community could not be loaded.';
+const coverImage = communityDetails?.cover_image || `https://images.hive.blog/u/${communityId}/cover`;
+const avatarImage = communityDetails?.avatar_url || `https://images.hive.blog/u/${communityId}/avatar`;
+
+const prevPage = page > 1 ? `/communities/${communityId}?page=${page - 1}` : null;
+const nextPage = recentPosts.length === limit ? `/communities/${communityId}?page=${page + 1}` : null;
+
+const breadcrumbs = [
+  { label: 'Home', href: '/' },
+  { label: 'Communities', href: '/communities' },
+  { label: communityDetails ? communityDetails.title : 'Community', href: `/communities/${communityId}` }
+];
+---
+
+<HomeLayout title={title} finalCoverUrl={coverImage} avatarUrl={avatarImage} noindex={true} breadcrumbs={breadcrumbs}>
+  <Fragment slot="header">
+    <h1>{title}</h1>
+  </Fragment>
+
+  <Fragment slot="hero">
+    {communityDetails ? (
+      <div class="community-detail-hero">
+        <img src={avatarImage} alt={`${title} Avatar`} class="community-detail-avatar" />
+        <h2>{title}</h2>
+        <p>{description}</p>
+        {communityDetails.subscribers && <p>{communityDetails.subscribers} Subscribers</p>}
+        {communityDetails.lang && <p>Language: {communityDetails.lang.toUpperCase()}</p>}
+      </div>
+    ) : (
+      <p>Loading community details or community not found...</p>
+    )}
+  </Fragment>
+
+  <Fragment slot="posts">
+    {communityDetails ? (
+      <div class="community-posts">
+        <h3>Recent Posts in {title}</h3>
+        {recentPosts.length > 0 ? (
+          <div class="posts-grid">
+            {recentPosts.map(post => (
+              <PostCard post={post} communityId={communityId} />
+            ))}
+          </div>
+        ) : (
+          <p>{errorMessage || 'No recent posts found for this community.'}</p>
+        )}
+        <div class="pagination-controls">
+          {prevPage && <a href={prevPage} class="pagination-link">Previous</a>}
+          {nextPage && <a href={nextPage} class="pagination-link">Next</a>}
+        </div>
+      </div>
+    ) : (
+      <p>No community details available.</p>
+    )}
+  </Fragment>
+
+  <Fragment slot="sidebar">
+    <ActiveCommunitiesSidebar />
+  </Fragment>
+
+  <Fragment slot="footer">
+    <p>&copy; 2025 My Blog. All rights reserved.</p>
+  </Fragment>
+</HomeLayout>
+
+<style>
+  .community-detail-hero {
+    text-align: center;
+    padding: 2rem;
+  }
+  .community-detail-avatar {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 1rem;
+  }
+
+  .posts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+    padding: 1.5rem 0;
+  }
+
+  .pagination-controls {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 2rem;
+  }
+
+  .pagination-link {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    text-decoration: none;
+    color: var(--color-background);
+    background-color: var(--color-accent);
+    font-weight: bold;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+  }
+
+  .pagination-link:hover {
+    background-color: var(--color-accent-dark);
+    transform: translateY(-2px);
+  }
+</style>

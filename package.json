@@ -7,9 +7,12 @@
     "start": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "functions:serve": "netlify functions:serve"
   },
   "dependencies": {
-    "astro": "^4.0.0"
+    "@astrojs/node": "^9.3.0",
+    "astro": "^5.12.3",
+    "hiveblogkit": "^1.0.0"
   }
 }

@@ -1,0 +1,138 @@
+---
+interface Props {
+  post: {
+    title: string;
+    author: string;
+    permlink: string;
+    created: string;
+    body: string;
+    json_metadata?: string;
+    children: number;
+    pending_payout_value: string;
+    total_payout_value?: string;
+    payout?: number;
+    stats?: {
+      total_votes: number;
+    };
+  };
+  communityId?: string;
+}
+
+const { post, communityId } = Astro.props;
+
+const postUrl = communityId 
+  ? `/communities/${communityId}/${post.author}/${post.permlink}`
+  : `/${post.author}/${post.permlink}`;
+
+let imageUrl = 'https://via.placeholder.com/400x200?text=No+Image'; // Valor por defecto
+
+// Lógica de extracción de imagen del proyecto de referencia
+let metadata = {};
+try {
+  metadata = typeof post.json_metadata === 'string' ? JSON.parse(post.json_metadata) : post.json_metadata;
+} catch (e) {
+  console.warn(`Warning: Could not parse json_metadata for post ${post.permlink}:`, e);
+}
+
+if (metadata.image && metadata.image.length > 0) {
+  imageUrl = metadata.image[0];
+} else if (post.body) {
+  // Try to extract the first image from the post body
+  const markdownImageRegex = /!\[.*\]\((https?:[^)]+\.(?:jpg|jpeg|png|gif|webp|svg))\)/i;
+  const htmlImageRegex = /<img[^>]+src=["\\](https?:[^"\\]+\.(?:jpg|jpeg|png|gif|webp|svg))["\\][^>]*>/i;
+  const directImageUrlRegex = /(https?:[^\s]+\.(?:jpg|jpeg|png|gif|webp|svg))/i;
+
+  let match;
+
+  match = post.body.match(markdownImageRegex);
+  if (match && match[1]) {
+    imageUrl = match[1];
+  } else {
+    match = post.body.match(htmlImageRegex);
+    if (match && match[1]) {
+      imageUrl = match[1];
+    } else {
+      match = post.body.match(directImageUrlRegex);
+      if (match && match[1]) {
+        imageUrl = match[1];
+      }
+    }
+  }
+}
+
+const payout = post.payout ? `${post.payout.toFixed(2)}` : post.pending_payout_value;
+const rewards = payout.endsWith('HBD') ? payout : `${payout} HBD`;
+
+---
+
+<a href={postUrl} class="post-card">
+  <img src={imageUrl} alt={post.title} class="post-image" />
+  <div class="post-content">
+    <h3>{post.title}</h3>
+    <p class="post-author">By {post.author} on {new Date(post.created).toLocaleDateString()}</p>
+    <div class="post-stats">
+      <span>Votes: {post.stats?.total_votes || 0}</span>
+      <span>Comments: {post.children || 0}</span>
+      <span>Rewards: {rewards}</span>
+    </div>
+  </div>
+</a>
+
+<style>
+  .post-card {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    overflow: hidden;
+    text-decoration: none;
+    color: inherit;
+    transition: transform 0.2s ease-in-out;
+    background-color: var(--color-background-card);
+  }
+
+  .post-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  .post-image {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+  }
+
+  .post-content {
+    padding: 1rem;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .post-content h3 {
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+    font-size: 1.25rem;
+    color: var(--color-heading-text);
+  }
+
+  .post-author {
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+    margin-bottom: 0.5rem;
+  }
+
+  .post-snippet {
+    font-size: 0.9rem;
+    color: var(--color-text);
+    margin-bottom: 1rem;
+    flex-grow: 1;
+  }
+
+  .post-stats {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+  }
+</style>

@@ -1,0 +1,136 @@
+---
+import allCommunities from '../data/all_communities.json';
+import subscribedCommunitiesData from '../data/subscribed_communities.json';
+
+// Get the names of subscribed communities for easy lookup
+const subscribedCommunityNames = new Set(subscribedCommunitiesData.map(comm => comm.name));
+
+// Separate subscribed communities from all communities
+const subscribedCommunities = allCommunities.filter(comm => subscribedCommunityNames.has(comm.name));
+const nonSubscribedCommunities = allCommunities.filter(comm => !subscribedCommunityNames.has(comm.name));
+
+// Sort non-subscribed communities by num_authors (descending) and then by sum_pending (descending)
+const activeCommunities = nonSubscribedCommunities
+  .sort((a, b) => {
+    if (b.num_authors !== a.num_authors) {
+      return b.num_authors - a.num_authors;
+    }
+    return b.sum_pending - a.sum_pending;
+  })
+  .slice(0, 25); // Get the top 25
+
+const getCommunityImageUrl = (community) => {
+  // Use images.hive.blog to fetch the avatar directly
+  return `https://images.hive.blog/u/${community.name}/avatar`;
+};
+---
+
+<aside class="active-communities-sidebar">
+  {subscribedCommunities.length > 0 && (
+    <>
+      <h3>My Subscribed Communities</h3>
+      <ul>
+        {subscribedCommunities.map((community) => (
+          <li>
+            <a href={`/communities/${community.name}`}>
+              <img src={getCommunityImageUrl(community)} alt={community.title} class="community-avatar" />
+              <span>{community.title}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+      <hr /> {/* Separator */}
+    </>
+  )}
+
+  <h3>Most Active Communities</h3>
+  <ul>
+    {activeCommunities.map((community) => (
+      <li>
+        <a href={`/communities/${community.name}`}>
+          <img src={getCommunityImageUrl(community)} alt={community.title} class="community-avatar" />
+          <span>{community.title}</span>
+        </a>
+      </li>
+    ))}
+  </ul>
+
+  <div class="all-communities-link">
+    <a href="/communities/all/1" class="button">All Communities</a>
+  </div>
+</aside>
+
+<style>
+  .all-communities-link {
+    margin-top: 2rem;
+    text-align: center;
+  }
+
+  .all-communities-link .button {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    background-color: var(--color-accent);
+    color: var(--color-background);
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+  }
+
+  .all-communities-link .button:hover {
+    background-color: var(--color-accent-dark);
+  }
+</style>
+
+<style>
+  .active-communities-sidebar {
+    width: 280px;
+    padding: 1.5rem;
+    background-color: var(--color-card-background);
+    border-radius: 8px;
+    box-shadow: var(--shadow-elevation-low);
+    margin-left: 2rem;
+    align-self: flex-start; /* Aligns the sidebar to the top */
+    position: sticky;
+    top: 20px; /* Adjust as needed for sticky positioning */
+  }
+
+  .active-communities-sidebar h3 {
+    font-size: 1.5rem;
+    color: var(--color-heading-text);
+    margin-bottom: 1.5rem;
+    text-align: center;
+  }
+
+  .active-communities-sidebar ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .active-communities-sidebar li {
+    margin-bottom: 1rem;
+  }
+
+  .active-communities-sidebar a {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    text-decoration: none;
+    color: var(--color-text);
+    font-weight: 500;
+    transition: color 0.2s ease-in-out;
+  }
+
+  .active-communities-sidebar a:hover {
+    color: var(--color-primary);
+  }
+
+  .active-communities-sidebar .community-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid var(--color-border);
+  }
+</style>
