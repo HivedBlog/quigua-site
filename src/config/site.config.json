@@ -1,0 +1,18 @@
+{
+  "title": "Mi Blog Personal",
+  "username": "usuario-ejemplo",
+  "hiveUsername": "quigua",
+  "profileReputation": 53.52,
+  "profileAbout": "Became an application developer for the Hive blockchain",
+  "categories": [
+    {
+      "name": "Tecnolog\u00eda",
+      "slug": "tecnologia"
+    },
+    {
+      "name": "Viajes",
+      "slug": "viajes"
+    }
+  ],
+  "domainName": "blogdelusuario.com"
+}
