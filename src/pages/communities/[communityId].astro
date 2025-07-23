@@ -24,6 +24,7 @@ if (localCommunity) {
   try {
     // Construct the base URL for the Netlify function
     const netlifyFunctionBaseUrl = `${Astro.url.origin}/api/get-community-posts`;
+    console.log('Community ID before fetch:', communityId);
 
     // For pagination, we need to get posts from previous pages to find the correct start_author and start_permlink.
     // This is inefficient, but necessary with the Hive API.
@@ -37,7 +38,9 @@ if (localCommunity) {
       }
     }
 
-    const currentPostsResponse = await fetch(`${netlifyFunctionBaseUrl}?communityId=${communityId}&limit=${limit}${allPostsForPagination.length > 0 ? `&start_author=${allPostsForPagination[allPostsForPagination.length - 1].author}&start_permlink=${allPostsForPagination[allPostsForPagination.length - 1].permlink}` : ''}`);
+    const currentPostsUrl = `${netlifyFunctionBaseUrl}?communityId=${communityId}&limit=${limit}${allPostsForPagination.length > 0 ? `&start_author=${allPostsForPagination[allPostsForPagination.length - 1].author}&start_permlink=${allPostsForPagination[allPostsForPagination.length - 1].permlink}` : ''}`;
+    console.log('Fetching current posts from:', currentPostsUrl);
+    const currentPostsResponse = await fetch(currentPostsUrl);
     recentPosts = await currentPostsResponse.json();
 
   } catch (error) {

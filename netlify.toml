@@ -4,6 +4,3 @@
 
 [build.processing]
   submodules = true
-
-[functions]
-  directory = "netlify/functions"

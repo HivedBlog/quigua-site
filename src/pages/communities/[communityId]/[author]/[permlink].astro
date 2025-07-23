@@ -1,0 +1,271 @@
+---
+import { marked } from 'marked';
+import HomeLayout from '../../../../layouts/HomeLayout.astro';
+import CommentCard from '../../../../components/CommentCard.astro';
+
+export const prerender = false;
+
+export async function getStaticPaths() {
+  return [];
+}
+
+const { communityId, author, permlink } = Astro.params;
+
+let post = null;
+let errorMessage = null;
+
+let processedBody = '';
+let comments = [];
+
+function replaceImageUrlsWithImgTags(htmlContent) {
+  if (!htmlContent) return '';
+  const imageUrlRegex = /(?<!src=")(?<!href=")(?<!src= ")(?<!href= ")(https?:[^\s]+\.(?:jpg|jpeg|png|gif|webp|svg))/gi;
+  return htmlContent.replace(imageUrlRegex, (url) => `<img src="${url}" alt="Image from post">`);
+}
+
+try {
+  const postContentUrl = `${Astro.url.origin}/api/get-post-content?author=${author}&permlink=${permlink}`;
+  const postResponse = await fetch(postContentUrl);
+  const postData = await postResponse.json();
+
+  if (postData && !postData.error) {
+    post = postData.result; // Assuming the API returns { result: post_object }
+
+    // Process Markdown to HTML
+    let tempBody = marked(post.body);
+    processedBody = replaceImageUrlsWithImgTags(tempBody);
+
+    // Fetch comments for the post
+    const commentsUrl = `${Astro.url.origin}/api/get-post-comments?author=${author}&permlink=${permlink}`;
+    const commentsResponse = await fetch(commentsUrl);
+    const commentsData = await commentsResponse.json();
+
+    if (commentsData && !commentsData.error) {
+      comments = commentsData; // Assuming the API returns an array of comments
+    } else {
+      console.warn(`No comments found for ${author}/${permlink} or an error occurred:`, commentsData.error);
+      comments = []; // Ensure comments is an empty array if null or error
+    }
+
+  } else {
+    errorMessage = "Post not found or error loading.";
+  }
+} catch (error) {
+  console.error(`Error fetching post ${permlink} from community ${communityId}:`, error);
+  errorMessage = "Error loading post.";
+}
+
+function sanitizeHtml(html) {
+  if (!html) return '';
+  return html.replace(/<script\b[^<]*(?:(?!<\/script>)[^<]*)*<\/script>/gi, '')
+             .replace(/on\w+=["'][^"']*["']/gi, '');
+}
+
+const sanitizedBody = post ? sanitizeHtml(processedBody) : '';
+
+const title = post ? post.title : 'Post Not Found';
+const description = post ? post.body_snippet || post.body.substring(0, 150) : '';
+const coverImage = post?.img_url || `https://images.hive.blog/u/${post?.author}/cover`;
+const rewards = post ? (post.total_payout_value === '0.000 HBD' ? post.pending_payout_value : post.total_payout_value) : 'N/A';
+
+const breadcrumbs = [
+  { label: 'Home', href: '/' },
+  { label: 'Communities', href: '/communities' },
+  { label: communityId, href: `/communities/${communityId}` },
+  { label: post ? post.title : 'Post', href: `/communities/${communityId}/${author}/${permlink}` }
+];
+
+console.log("Debug Info for Community Post Page:");
+console.log("Post Author:", post?.author);
+console.log("Post Image URL (img_url):", post?.img_url);
+console.log("Constructed Cover Image URL:", coverImage);
+console.log("Constructed Avatar URL:", `https://images.hive.blog/u/${post?.author}/avatar`);
+
+---
+
+<HomeLayout title={title} hiveUsername={post?.author || ''} avatarUrl={post?.author ? `https://images.hive.blog/u/${post.author}/avatar` : ''} finalCoverUrl={coverImage || ''} noindex={true} breadcrumbs={breadcrumbs}>
+  <Fragment slot="header">
+    <h1>{title}</h1>
+  </Fragment>
+
+  <Fragment slot="hero">
+    {post ? (
+      <div class="post-detail-hero">
+        <h2>{post.title}</h2>
+        <p>By {post.author} on {new Date(post.created).toLocaleDateString()}</p>
+      </div>
+    ) : (
+      <p>Loading post details or post not found...</p>
+    )}
+  </Fragment>
+
+  <Fragment slot="posts">
+    {post ? (
+      <div class="post-content-body" set:html={sanitizedBody}></div>
+    ) : (
+      <p>No post details available.</p>
+    )}
+
+    {comments && comments.length > 0 && (
+      <section class="post-comments-section">
+        <h3>Comments ({comments.length})</h3>
+        <div class="comments-list">
+          {comments.map((comment) => (
+            <CommentCard comment={comment} isNested={false} />
+          ))}
+        </div>
+      </section>
+    )}
+  </Fragment>
+
+  <Fragment slot="sidebar">
+    {post && (
+      <div class="post-sidebar">
+        <h3>Post Details</h3>
+        <div class="detail-item">
+          <strong>Author:</strong>
+          <a href={`https://hive.blog/@${post.author}`} target="_blank" rel="noopener noreferrer">@{post.author}</a>
+        </div>
+        <div class="detail-item">
+          <strong>Category:</strong>
+          <span>{post.category}</span>
+        </div>
+        <div class="detail-item">
+          <strong>Interactions:</strong>
+          <span>{post.children} comments</span>
+        </div>
+        <div class="detail-item">
+          <strong>Rewards:</strong>
+          <span>{rewards}</span>
+        </div>
+        {post.beneficiaries && post.beneficiaries.length > 0 && (
+          <div class="detail-item">
+            <strong>Beneficiaries:</strong>
+            <ul>
+              {post.beneficiaries.map(beneficiary => (
+                <li>
+                  <a href={`https://hive.blog/@${beneficiary.account}`} target="_blank" rel="noopener noreferrer">
+                    @{beneficiary.account}
+                  </a> - {beneficiary.weight / 100}%
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+        <div class="detail-item">
+          <strong>Votes ({post.active_votes.length}):</strong>
+          <details>
+            <summary>View Voters</summary>
+            <ul class="voters-list">
+              {post.active_votes.map(vote => (
+                <li>
+                  <a href={`https://hive.blog/@${vote.voter}`} target="_blank" rel="noopener noreferrer">
+                    @{vote.voter}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </details>
+        </div>
+      </div>
+    )}
+  </Fragment>
+
+  <Fragment slot="footer">
+    <p>&copy; 2025 My Blog. All rights reserved.</p>
+  </Fragment>
+</HomeLayout>
+
+<style>
+  .post-detail-hero {
+    text-align: center;
+    padding: 2rem;
+  }
+  .post-content-body {
+    margin-top: 2rem;
+    line-height: 1.6;
+    color: var(--color-text);
+  }
+  .post-content-body img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 1rem auto;
+    border-radius: 8px;
+  }
+  .post-comments-section {
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--color-border);
+  }
+  .post-comments-section h3 {
+    margin-bottom: 1.5rem;
+    font-size: 1.8rem;
+    color: var(--color-heading-text);
+  }
+
+  .post-sidebar {
+    padding: 1.5rem;
+    background-color: var(--color-background-secondary);
+    border-radius: 8px;
+  }
+
+  .post-sidebar h3 {
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+    font-size: 1.6rem;
+    color: var(--color-heading-text);
+    border-bottom: 1px solid var(--color-border);
+    padding-bottom: 0.5rem;
+  }
+
+  .detail-item {
+    margin-bottom: 1rem;
+  }
+
+  .detail-item strong {
+    display: block;
+    margin-bottom: 0.25rem;
+    color: var(--color-text-secondary);
+  }
+
+  .detail-item a,
+  .detail-item span {
+    font-size: 1rem;
+    color: var(--color-text);
+  }
+
+  .detail-item a {
+    text-decoration: none;
+    color: var(--color-accent);
+  }
+
+  .detail-item a:hover {
+    text-decoration: underline;
+  }
+
+  .detail-item ul {
+    list-style: none;
+    padding: 0;
+    margin: 0.5rem 0 0 0;
+  }
+
+  .detail-item li {
+    margin-bottom: 0.25rem;
+  }
+
+  .voters-list {
+    max-height: 200px;
+    overflow-y: auto;
+    border: 1px solid var(--color-border);
+    padding: 0.5rem;
+    border-radius: 4px;
+    margin-top: 0.5rem;
+  }
+
+  details > summary {
+    cursor: pointer;
+    font-weight: bold;
+    color: var(--color-accent);
+  }
+</style>
