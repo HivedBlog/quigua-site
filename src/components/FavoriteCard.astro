@@ -1,0 +1,68 @@
+---
+interface Props {
+  favorite: {
+    username: string;
+    reputation: number;
+    avatar: string;
+    hivePower: string;
+    lastPost: string;
+  };
+}
+
+const { favorite } = Astro.props;
+---
+
+<a href={`https://hive.blog/@${favorite.username}`} target="_blank" rel="noopener noreferrer" class="favorite-card">
+  <img src={`https://images.hive.blog/u/${favorite.username}/avatar`} alt={`${favorite.username}'s avatar`} class="favorite-avatar" />
+  <div class="favorite-info">
+    <h3>@{favorite.username}</h3>
+    <p>Reputation: {favorite.reputation}</p>
+    <p>Hive Power: {favorite.hivePower} HP</p>
+    {favorite.lastPost && <p>Last Activity: {new Date(favorite.lastPost).toLocaleDateString()}</p>}
+  </div>
+</a>
+
+<style>
+  .favorite-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    padding: 1rem;
+    text-decoration: none;
+    color: inherit;
+    transition: transform 0.2s ease-in-out;
+    background-color: var(--color-background-card);
+  }
+
+  .favorite-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  .favorite-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 0.75rem;
+  }
+
+  .favorite-info {
+    text-align: center;
+  }
+
+  .favorite-info h3 {
+    margin-top: 0;
+    margin-bottom: 0.25rem;
+    font-size: 1.1rem;
+    color: var(--color-heading-text);
+  }
+
+  .favorite-info p {
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+    margin-bottom: 0.25rem;
+  }
+</style>
