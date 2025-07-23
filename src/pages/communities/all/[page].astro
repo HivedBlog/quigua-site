@@ -4,22 +4,22 @@ import allCommunities from '../../../data/all_communities.json';
 import CommunityCard from '../../../components/CommunityCard.astro';
 import siteConfig from '../../../config/site.config.json';
 
-export async function getStaticPaths({ paginate }) {
-  // Sort communities alphabetically by title
-  const sortedCommunities = allCommunities.sort((a, b) => b.subscribers - a.subscribers);
+const PAGE_SIZE = 24; // Number of communities per page
 
-  console.log('Number of communities in getStaticPaths:', sortedCommunities.length);
+const url = new URL(Astro.request.url);
+const currentPage = parseInt(url.searchParams.get('page') || '1');
 
-  return paginate(sortedCommunities, { pageSize: 24 });
-}
+// Calculate pagination details
+const startIndex = (currentPage - 1) * PAGE_SIZE;
+const endIndex = startIndex + PAGE_SIZE;
+const paginatedCommunities = allCommunities.slice(startIndex, endIndex);
+const totalPages = Math.ceil(allCommunities.length / PAGE_SIZE);
 
-const { page = { currentPage: 1, url: { prev: null, next: null }, data: [] } } = Astro.props;
+const prevPage = currentPage > 1 ? `/communities/all/?page=${currentPage - 1}` : null;
+const nextPage = currentPage < totalPages ? `/communities/all/?page=${currentPage + 1}` : null;
 
-console.log('Page object:', page);
-console.log('Page data:', page.data);
-
-const title = `All Communities - Page ${page.currentPage}`;
-const description = `Browse all communities on Hive, page ${page.currentPage}.`;
+const title = `All Communities - Page ${currentPage}`;
+const description = `Browse all communities on Hive, page ${currentPage}.`;
 
 const breadcrumbs = [
   { label: 'Home', href: '/' },
@@ -48,15 +48,15 @@ const finalCoverUrl = `https://images.hive.blog/u/${hiveUsername}/cover`;
 
   <Fragment slot="posts">
     <div class="communities-grid">
-      {page.data.map((community) => (
+      {paginatedCommunities.map((community) => (
         <CommunityCard community={community} />
       ))}
     </div>
 
     <div class="pagination-controls">
-      {page.url.prev && <a href={page.url.prev} class="pagination-link">Previous</a>}
-      <span>Page {page.currentPage} of {page.lastPage}</span>
-      {page.url.next && <a href={page.url.next} class="pagination-link">Next</a>}
+      {prevPage && <a href={prevPage} class="pagination-link">Previous</a>}
+      <span>Page {currentPage} of {totalPages}</span>
+      {nextPage && <a href={nextPage} class="pagination-link">Next</a>}
     </div>
   </Fragment>
 </HomeLayout>
