@@ -1,0 +1,68 @@
+---
+interface Props {
+  follower: {
+    username: string;
+    reputation: number;
+    avatar: string;
+    hivePower: string;
+    lastPost: string;
+  };
+}
+
+const { follower } = Astro.props;
+---
+
+<a href={`https://hive.blog/@${follower.username}`} target="_blank" rel="noopener noreferrer" class="follower-card">
+  <img src={`https://images.hive.blog/u/${follower.username}/avatar`} alt={`${follower.username}'s avatar`} class="follower-avatar" />
+  <div class="follower-info">
+    <h3>@{follower.username}</h3>
+    <p>Reputation: {follower.reputation}</p>
+    <p>Hive Power: {follower.hivePower} HP</p>
+    {follower.lastPost && <p>Last Activity: {new Date(follower.lastPost).toLocaleDateString()}</p>}
+  </div>
+</a>
+
+<style>
+  .follower-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    padding: 1rem;
+    text-decoration: none;
+    color: inherit;
+    transition: transform 0.2s ease-in-out;
+    background-color: var(--color-background-card);
+  }
+
+  .follower-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  .follower-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 0.75rem;
+  }
+
+  .follower-info {
+    text-align: center;
+  }
+
+  .follower-info h3 {
+    margin-top: 0;
+    margin-bottom: 0.25rem;
+    font-size: 1.1rem;
+    color: var(--color-heading-text);
+  }
+
+  .follower-info p {
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+    margin-bottom: 0.25rem;
+  }
+</style>
