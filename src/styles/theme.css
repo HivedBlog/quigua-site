@@ -1,0 +1,17 @@
+:root {
+  --color-primary: #333;
+  --color-secondary: #e0e0e0;
+  --color-text-light: white;
+  --color-text-dark: black;
+  --color-background-light: #f0f0f0;
+  --color-background-dark: #f9f9f9;
+  --color-hero-overlay: rgba(0, 0, 0, 0.5);
+  --color-border: #e0e0e0;
+  --color-background-card: #ffffff;
+  --color-heading-text: #333;
+  --color-text-muted: #666;
+
+  --content-max-width: 1200px;
+  --spacing-md: 1rem;
+  --spacing-lg: 3rem;
+}

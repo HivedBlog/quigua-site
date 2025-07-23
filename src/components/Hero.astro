@@ -1,0 +1,54 @@
+---
+interface Props {
+  coverUrl: string;
+}
+
+const { coverUrl } = Astro.props;
+---
+
+<section class="hero-section" style={{ backgroundImage: `url(${coverUrl})` }}>
+  <div class="hero-overlay">
+    <div class="container hero-content">
+      <slot />
+    </div>
+  </div>
+</section>
+
+<style is:global>
+  .hero-section {
+    position: relative;
+    padding: var(--spacing-lg) 0;
+    text-align: center;
+    background-size: cover;
+    background-position: left center;
+    background-repeat: no-repeat;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-text-light);
+    aspect-ratio: 2048 / 512;
+  }
+
+  .hero-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black overlay */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .hero-content {
+    width: 100%;
+    z-index: 1; /* Ensure content is above the overlay */
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); /* Keep text shadow for extra pop */
+  }
+
+  .hero-content h2 {
+    font-size: 2rem;
+    line-height: 1.2;
+  }
+</style>

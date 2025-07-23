@@ -1,0 +1,47 @@
+---
+import { ViewTransitions } from 'astro:transitions';
+import '../styles/theme.css'; // Importación de CSS en el frontmatter
+
+interface Props {
+	title: string;
+  noindex?: boolean; // Nueva propiedad opcional para noindex
+}
+
+const { title, noindex = false } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="description" content="Astro description" />
+		<meta name="viewport" content="width=device-width" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<meta name="generator" content={Astro.generator} />
+		<title>{title}</title>
+    {noindex && <meta name="robots" content="noindex">}
+    <ViewTransitions />
+	</head>
+	<body>
+		<slot />
+	</body>
+</html>
+
+<style is:global>
+  /* Reset de box-sizing para facilitar el diseño */
+  html {
+    box-sizing: border-box;
+  }
+  *,
+  *::before,
+  *::after {
+    box-sizing: inherit;
+  }
+
+  /* Contenedor principal para centrar el contenido */
+  .container {
+    max-width: var(--content-max-width);
+    margin: 0 auto;
+    padding: 0 var(--spacing-md); /* Padding horizontal para evitar que el contenido toque los bordes */
+  }
+</style>

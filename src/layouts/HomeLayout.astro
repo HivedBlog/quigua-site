@@ -1,0 +1,90 @@
+---
+import MainLayout from './MainLayout.astro';
+import Header from '../components/Header.astro';
+import Hero from '../components/Hero.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+
+interface Props {
+  title: string;
+  hiveUsername: string;
+  avatarUrl: string;
+  finalCoverUrl: string;
+  siteConfig: any;
+  breadcrumbs?: { label: string; href: string; }[];
+}
+
+const { title, hiveUsername, avatarUrl, finalCoverUrl, siteConfig, breadcrumbs } = Astro.props;
+---
+
+<MainLayout title={title}>
+  <div class="fixed-header-and-breadcrumbs">
+    <Header hiveUsername={hiveUsername} avatarUrl={avatarUrl} />
+    {breadcrumbs && <Breadcrumbs items={breadcrumbs} />}
+  </div>
+
+  <main>
+    <Hero coverUrl={finalCoverUrl}>
+  <slot name="hero" />
+</Hero>
+
+    <section class="content-section container">
+      <div class="posts-list">
+        <slot name="posts" />
+      </div>
+      <aside class="sidebar">
+        <slot name="sidebar" />
+      </aside>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <slot name="footer" />
+  </footer>
+
+  <style is:global>
+    body {
+      margin: 0;
+      font-family: sans-serif;
+    }
+    main {
+      padding-top: 9rem; /* Adjusted for fixed header and breadcrumbs */
+    }
+    .content-section {
+      display: flex;
+      gap: var(--spacing-md);
+      padding: var(--spacing-md) 0; /* Padding vertical, horizontal ya lo da el container */
+      align-items: flex-start; /* Alinea los elementos al inicio para que el sidebar no se estire */
+    }
+    .posts-list {
+      flex: 1; /* Permite que ocupe el espacio disponible */
+      max-width: 800px; /* Ancho máximo para el contenido principal */
+      margin-right: var(--spacing-md); /* Espacio entre el contenido y el sidebar */
+    }
+    .posts-list img {
+      max-width: 100%; /* Asegura que las imágenes no se desborden */
+      height: auto; /* Mantiene la proporción de la imagen */
+    }
+    .sidebar {
+      width: 300px; /* Ancho fijo para el sidebar */
+      flex-shrink: 0; /* Evita que el sidebar se encoja */
+      background-color: var(--color-secondary);
+      padding: 1rem;
+    }
+    .site-footer {
+      background-color: var(--color-primary);
+      color: var(--color-text-light);
+      padding: 1rem;
+      text-align: center;
+    }
+  </style>
+  <style>
+    .fixed-header-and-breadcrumbs {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      z-index: 1000;
+      background-color: var(--color-primary); /* Ensure background covers the whole fixed area */
+    }
+  </style>
+ </MainLayout>

@@ -1,0 +1,65 @@
+---
+import HomeLayout from '../layouts/HomeLayout.astro';
+import Header from '../components/Header.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import Hero from '../components/Hero.astro';
+import Sidebar from '../components/Sidebar.astro';
+
+// Placeholder data for props, as we are creating a generic page
+const siteConfig = {
+  title: "Quigua Site",
+  hiveUsername: "user",
+  profileAbout: "This is a generic hero section for the Quigua Site."
+};
+
+const breadcrumbs = [
+  { label: 'Home', href: '/' },
+  { label: 'Current Page', href: '#' }
+];
+
+const hiveUsername = siteConfig.hiveUsername;
+const avatarUrl = `https://images.hive.blog/u/${hiveUsername}/avatar`;
+const finalCoverUrl = `https://images.hive.blog/u/${hiveUsername}/cover`;
+---
+
+<HomeLayout
+  title="Página de Inicio - Quigua Site"
+  hiveUsername={hiveUsername}
+  avatarUrl={avatarUrl}
+  finalCoverUrl={finalCoverUrl}
+  siteConfig={siteConfig}
+  breadcrumbs={breadcrumbs}
+>
+  <Fragment slot="header">
+    <Header siteConfig={siteConfig} />
+  </Fragment>
+
+  <Fragment slot="hero">
+    <Hero siteConfig={siteConfig} />
+  </Fragment>
+
+  <Fragment slot="posts">
+    <div class="main-content-area">
+      <h2>Contenido Principal</h2>
+      <p>Este es un mensaje genérico en el área de contenido principal de la página de inicio.</p>
+      <p>Aquí se mostrará el contenido específico de cada sección.</p>
+    </div>
+  </Fragment>
+
+  <Fragment slot="sidebar">
+    <Sidebar />
+  </Fragment>
+
+  <Fragment slot="footer">
+    <p>&copy; 2025 Quigua Site. Todos los derechos reservados.</p>
+  </Fragment>
+</HomeLayout>
+
+<style>
+  .main-content-area {
+    padding: 2rem;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+</style>
