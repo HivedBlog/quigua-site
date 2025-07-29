@@ -90,16 +90,21 @@ const { hiveUsername, avatarUrl } = Astro.props;
     display: flex;
     gap: 1.5rem; /* Espacio entre elementos del menú */
   }
+  .main-nav ul li {
+    position: relative;
+    /* Separador para desktop */
+    border-right: 1px solid var(--color-text-light);
+    padding-right: 1.5rem;
+  }
+  .main-nav ul li:last-child {
+    border-right: none;
+    padding-right: 0;
+  }
   .main-nav a {
     color: var(--color-text-light);
     text-decoration: none;
     font-weight: bold;
     white-space: nowrap; /* Evita que los enlaces se rompan en varias líneas */
-  }
-
-  /* Estilos para el menú desplegable */
-  .main-nav ul li {
-    position: relative;
   }
 
   .main-nav ul ul {
@@ -188,17 +193,31 @@ const { hiveUsername, avatarUrl } = Astro.props;
     .main-nav ul {
       flex-direction: column;
       width: 100%;
-      align-items: center;
+      align-items: flex-start; /* Align items to the left */
       padding: 1rem 0;
     }
     .main-nav ul li {
       width: 100%;
-      text-align: center;
+      text-align: left; /* Align text to the left */
+      border-right: none; /* Remove desktop separator */
+      padding-right: 0; /* Remove desktop padding */
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2); /* Separator for mobile */
+      padding-bottom: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .main-nav ul li:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
     }
     .main-nav ul ul {
       position: static; /* Submenu appears inline */
       box-shadow: none;
       background-color: #00000020; /* Slightly different background for submenu */
+      list-style: disc; /* Bullet list for submenus */
+      padding-left: 1.5rem; /* Indent for bullet list */
+    }
+    .main-nav.is-open ul ul {
+      display: flex; /* Show all submenus when the main nav is open */
     }
     .hamburger-menu {
       display: flex; /* Show hamburger on mobile */
