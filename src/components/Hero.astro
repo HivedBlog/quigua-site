@@ -19,8 +19,8 @@ const { coverUrl } = Astro.props;
     position: relative;
     padding: var(--spacing-lg) 0;
     text-align: center;
-    background-size: cover;
-    background-position: left center;
+    background-size: contain;
+    background-position: 75% center;
     background-repeat: no-repeat;
     display: flex;
     align-items: center;
@@ -48,7 +48,13 @@ const { coverUrl } = Astro.props;
   }
 
   .hero-content h2 {
-    font-size: 2rem;
+    font-size: 1.8rem;
     line-height: 1.2;
+  }
+
+  @media (max-width: 768px) {
+    .hero-content h2 {
+      font-size: 1.35rem; /* Smaller font size for mobile */
+    }
   }
 </style>

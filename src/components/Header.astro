@@ -14,7 +14,15 @@ const { hiveUsername, avatarUrl } = Astro.props;
   <div class="header-content">
     <Image src={hiveLogo} alt="Hive Logo" width={50} height={50} class="hive-logo" />
     <h1>The Blog of {hiveUsername}</h1>
-    <nav class="main-nav">
+    
+    <!-- Hamburger Menu Button -->
+    <button id="hamburger-toggle" class="hamburger-menu" aria-label="Toggle Menu">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+
+    <nav id="main-nav-menu" class="main-nav">
       <ul>
         <li><a href="/">Home</a></li>
         <li>
@@ -32,6 +40,21 @@ const { hiveUsername, avatarUrl } = Astro.props;
     <img src={avatarUrl} alt={`${hiveUsername}'s avatar`} class="avatar" />
   </div>
 </header>
+
+<script is:inline>
+  document.addEventListener('astro:page-load', () => {
+    const hamburger = document.getElementById('hamburger-toggle');
+    const nav = document.getElementById('main-nav-menu');
+
+    if (hamburger && nav) {
+      hamburger.addEventListener('click', () => {
+        nav.classList.toggle('is-open');
+        // Optional: Prevent body scroll when menu is open
+        document.body.classList.toggle('no-scroll', nav.classList.contains('is-open'));
+      });
+    }
+  });
+</script>
 
 <style is:global>
   .fixed-header {
@@ -116,5 +139,72 @@ const { hiveUsername, avatarUrl } = Astro.props;
   }
   .hive-logo {
     margin-right: 1rem; /* Espacio a la derecha del logo */
+  }
+
+  /* Hamburger Menu Styles */
+  .hamburger-menu {
+    display: none; /* Hidden by default */
+    flex-direction: column;
+    justify-content: space-around;
+    width: 2rem;
+    height: 2rem;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    z-index: 10;
+  }
+  .hamburger-menu span {
+    width: 2rem;
+    height: 0.25rem;
+    background: var(--color-text-light);
+    border-radius: 10px;
+    transition: all 0.3s linear;
+    position: relative;
+    transform-origin: 1px;
+  }
+
+  /* Responsive Styles */
+  @media (max-width: 768px) {
+    .header-content h1 {
+      font-size: 1.1rem; /* Smaller font size for mobile */
+      padding: 0 0.5rem;
+    }
+    .avatar, .hive-logo {
+      width: 40px;
+      height: 40px;
+    }
+    .main-nav {
+      display: none; /* Hide nav by default on mobile */
+      position: absolute;
+      top: 100%;
+      left: 0;
+      width: 100%;
+      background-color: var(--color-primary);
+    }
+    .main-nav.is-open {
+      display: flex; /* Show nav when open */
+    }
+    .main-nav ul {
+      flex-direction: column;
+      width: 100%;
+      align-items: center;
+      padding: 1rem 0;
+    }
+    .main-nav ul li {
+      width: 100%;
+      text-align: center;
+    }
+    .main-nav ul ul {
+      position: static; /* Submenu appears inline */
+      box-shadow: none;
+      background-color: #00000020; /* Slightly different background for submenu */
+    }
+    .hamburger-menu {
+      display: flex; /* Show hamburger on mobile */
+    }
+    body.no-scroll {
+      overflow: hidden;
+    }
   }
 </style>

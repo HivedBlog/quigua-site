@@ -47,26 +47,28 @@ const { title, hiveUsername, avatarUrl, finalCoverUrl, siteConfig, breadcrumbs }
       font-family: sans-serif;
     }
     main {
-      padding-top: 9rem; /* Adjusted for fixed header and breadcrumbs */
+      padding-top: 9rem; /* Default padding, will be adjusted by JS */
     }
     .content-section {
       display: flex;
+      flex-wrap: wrap; /* Allow items to wrap */
       gap: var(--spacing-md);
-      padding: var(--spacing-md) 0; /* Padding vertical, horizontal ya lo da el container */
-      align-items: flex-start; /* Alinea los elementos al inicio para que el sidebar no se estire */
+      padding: var(--spacing-md) 0;
+      align-items: flex-start;
     }
     .posts-list {
-      flex: 1; /* Permite que ocupe el espacio disponible */
-      max-width: 800px; /* Ancho máximo para el contenido principal */
-      margin-right: var(--spacing-md); /* Espacio entre el contenido y el sidebar */
+      flex: 1; /* Allow to grow */
+      min-width: 0; /* Allow shrinking */
+      max-width: 800px; /* Max width for content */
+      margin-right: var(--spacing-md);
     }
     .posts-list img {
-      max-width: 100%; /* Asegura que las imágenes no se desborden */
-      height: auto; /* Mantiene la proporción de la imagen */
+      max-width: 100%;
+      height: auto;
     }
     .sidebar {
-      width: 300px; /* Ancho fijo para el sidebar */
-      flex-shrink: 0; /* Evita que el sidebar se encoja */
+      width: 300px; /* Default width */
+      flex-shrink: 0;
       background-color: var(--color-secondary);
       padding: 1rem;
     }
@@ -76,6 +78,19 @@ const { title, hiveUsername, avatarUrl, finalCoverUrl, siteConfig, breadcrumbs }
       padding: 1rem;
       text-align: center;
     }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .content-section {
+        flex-direction: column; /* Stack columns on small screens */
+      }
+      .posts-list,
+      .sidebar {
+        width: 100%; /* Full width on small screens */
+        max-width: none; /* Remove max-width constraint */
+        margin-right: 0; /* Remove margin */
+      }
+    }
   </style>
   <style>
     .fixed-header-and-breadcrumbs {
@@ -84,7 +99,27 @@ const { title, hiveUsername, avatarUrl, finalCoverUrl, siteConfig, breadcrumbs }
       left: 0;
       width: 100%;
       z-index: 1000;
-      background-color: var(--color-primary); /* Ensure background covers the whole fixed area */
+      background-color: var(--color-primary);
     }
   </style>
+<script is:inline>
+  document.addEventListener('astro:page-load', () => {
+    const headerAndBreadcrumbs = document.querySelector('.fixed-header-and-breadcrumbs');
+    const mainContent = document.querySelector('main');
+
+    if (headerAndBreadcrumbs && mainContent) {
+      const updatePadding = () => {
+        mainContent.style.paddingTop = `${headerAndBreadcrumbs.offsetHeight}px`;
+      };
+
+      // Update padding on load and resize
+      updatePadding();
+      window.addEventListener('resize', updatePadding);
+
+      // Observe changes in header height (e.g., due to menu opening)
+      const observer = new ResizeObserver(updatePadding);
+      observer.observe(headerAndBreadcrumbs);
+    }
+  });
+</script>
  </MainLayout>
