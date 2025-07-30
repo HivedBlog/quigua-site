@@ -5,6 +5,19 @@ import Breadcrumbs from '../components/Breadcrumbs.astro';
 import Hero from '../components/Hero.astro';
 import Sidebar from '../components/Sidebar.astro';
 import siteConfig from '../config/site.config.json';
+import HomePagePostCard from '../components/HomePagePostCard.astro';
+import { getLatestFavoritePosts } from '../../lib/hiveblogkit/index.js';
+
+const CLIENT_USERNAME = siteConfig.hiveUsername;
+const DATA_REPO_BASE_URL = 'https://raw.githubusercontent.com/quigua/hived-static-content/main/data';
+const favoritesDataUrl = `${DATA_REPO_BASE_URL}/${CLIENT_USERNAME}/favorites.json`;
+
+let followedUsersPosts = [];
+try {
+  followedUsersPosts = await getLatestFavoritePosts(CLIENT_USERNAME, 4, 1);
+} catch (error) {
+  console.error("Error fetching followed users' posts:", error);
+}
 
 const breadcrumbs = [
   { label: 'Home', href: '/' },
@@ -17,7 +30,7 @@ const finalCoverUrl = `https://images.hive.blog/u/${hiveUsername}/cover`;
 ---
 
 <HomeLayout
-  title="Página de Inicio - Quigua Site"
+  title="Home Page - Quigua Site"
   hiveUsername={hiveUsername}
   avatarUrl={avatarUrl}
   finalCoverUrl={finalCoverUrl}
@@ -34,10 +47,62 @@ const finalCoverUrl = `https://images.hive.blog/u/${hiveUsername}/cover`;
   </Fragment>
 
   <Fragment slot="posts">
-    <div class="main-content-area">
-      <h2>Contenido Principal</h2>
-      <p>Este es un mensaje genérico en el área de contenido principal de la página de inicio.</p>
-      <p>Aquí se mostrará el contenido específico de cada sección.</p>
+    <div class="section-container ad-banner">
+      <h2>Advertisement</h2>
+      <p>This is a placeholder for an advertisement banner.</p>
+      <!-- Placeholder for advertisement -->
+    </div>
+
+    <div class="section-container">
+      <h2>Recent Posts (last 7 days)</h2>
+      <!-- Placeholder for recent posts -->
+      <HomePagePostCard
+        author="testuser"
+        authorAvatarUrl="https://images.hive.blog/u/testuser/avatar"
+        title="This is a Sample Post Title"
+        votes={123}
+        comments={45}
+        hbdPayout="10.50 HBD"
+        publishedDate="2024-07-29"
+        imageUrl="https://via.placeholder.com/600x400?text=Post+Image"
+      />
+      <HomePagePostCard
+        author="anotheruser"
+        authorAvatarUrl="https://images.hive.blog/u/anotheruser/avatar"
+        title="Another Interesting Article"
+        votes={88}
+        comments={22}
+        hbdPayout="5.25 HBD"
+        publishedDate="2024-07-28"
+        imageUrl="https://via.placeholder.com/600x400?text=Another+Image"
+      />
+    </div>
+
+    <div class="section-container">
+      <h2>Recent Comments</h2>
+      <p>This section will display the most recent comments.</p>
+      <!-- Placeholder for recent comments -->
+    </div>
+
+    <div class="section-container">
+      <h2>Followed Users' Posts</h2>
+      <div class="posts-grid">
+        {
+          followedUsersPosts.length > 0 ? (
+            followedUsersPosts.map((post) => (
+              <HomePagePostCard {...post} />
+            ))
+          ) : (
+            <p>No posts found from followed users.</p>
+          )
+        }
+      </div>
+    </div>
+
+    <div class="section-container">
+      <h2>Trending Posts</h2>
+      <p>This section will display trending posts.</p>
+      <!-- Placeholder for trending posts -->
     </div>
   </Fragment>
 
@@ -46,7 +111,7 @@ const finalCoverUrl = `https://images.hive.blog/u/${hiveUsername}/cover`;
   </Fragment>
 
   <Fragment slot="footer">
-    <p>&copy; 2025 Quigua Site. Todos los derechos reservados.</p>
+    <p>&copy; 2025 Quigua Site. All rights reserved.</p>
   </Fragment>
 </HomeLayout>
 
@@ -57,4 +122,19 @@ const finalCoverUrl = `https://images.hive.blog/u/${hiveUsername}/cover`;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   }
-</style>
+  .section-container {
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+  .section-container h2 {
+    margin-top: 0;
+    color: var(--color-primary);
+  }
+  .posts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+  }

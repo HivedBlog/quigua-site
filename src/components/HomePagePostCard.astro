@@ -1,0 +1,83 @@
+---
+interface Props {
+  // These props will eventually hold the actual data
+  author: string;
+  authorAvatarUrl: string;
+  title: string;
+  votes: number;
+  comments: number;
+  hbdPayout: string;
+  publishedDate: string;
+  imageUrl: string;
+}
+
+const { author, authorAvatarUrl, title, votes, comments, hbdPayout, publishedDate, imageUrl } = Astro.props;
+---
+
+<div class="home-page-post-card">
+  <div class="card-header">
+    <img src={authorAvatarUrl} alt={`${author}'s avatar`} class="author-avatar-placeholder" />
+    <span class="author-name-placeholder">{author}</span>
+  </div>
+  <div class="card-image">
+    <img src={imageUrl} alt="Post Image Placeholder" class="post-image-placeholder" />
+  </div>
+  <div class="card-content">
+    <h3 class="post-title-placeholder">{title}</h3>
+    <div class="post-meta-placeholder">
+      <span>Votes: {votes}</span>
+      <span>Comments: {comments}</span>
+      <span>HBD: {hbdPayout}</span>
+      <span>Published: {publishedDate}</span>
+    </div>
+  </div>
+</div>
+
+<style>
+  .home-page-post-card {
+    border: 1px solid #ccc;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+  .card-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.5rem;
+  }
+  .author-avatar-placeholder {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #ddd;
+    margin-right: 0.5rem;
+  }
+  .author-name-placeholder {
+    font-weight: bold;
+    color: #333;
+  }
+  .card-image {
+    margin-bottom: 0.5rem;
+  }
+  .post-image-placeholder {
+    width: 100%;
+    height: 150px;
+    background-color: #eee;
+    object-fit: cover;
+  }
+  .post-title-placeholder {
+    font-size: 1.2rem;
+    color: #007bff;
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+  }
+  .post-meta-placeholder {
+    font-size: 0.9rem;
+    color: #666;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.8rem;
+  }
+</style>
