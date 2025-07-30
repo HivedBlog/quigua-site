@@ -9,31 +9,45 @@ interface Props {
   hbdPayout: string;
   publishedDate: string;
   imageUrl: string;
+  permlink: string;
 }
 
-const { author, authorAvatarUrl, title, votes, comments, hbdPayout, publishedDate, imageUrl } = Astro.props;
+const { author, authorAvatarUrl, title, votes, comments, hbdPayout, publishedDate, imageUrl, permlink } = Astro.props;
 ---
 
-<div class="home-page-post-card">
-  <div class="card-header">
-    <img src={authorAvatarUrl} alt={`${author}'s avatar`} class="author-avatar-placeholder" />
-    <span class="author-name-placeholder">{author}</span>
-  </div>
-  <div class="card-image">
-    <img src={imageUrl} alt="Post Image Placeholder" class="post-image-placeholder" />
-  </div>
-  <div class="card-content">
-    <h3 class="post-title-placeholder">{title}</h3>
-    <div class="post-meta-placeholder">
-      <span>Votes: {votes}</span>
-      <span>Comments: {comments}</span>
-      <span>HBD: {hbdPayout}</span>
-      <span>Published: {publishedDate}</span>
+<a href={`/post/${author}/${permlink}`} class="home-page-post-card-link">
+  <div class="home-page-post-card">
+    <div class="card-header">
+      <img src={authorAvatarUrl} alt={`${author}'s avatar`} class="author-avatar-placeholder" />
+      <span class="author-name-placeholder">{author}</span>
+    </div>
+    <div class="card-image">
+      <img src={imageUrl} alt="Post Image Placeholder" class="post-image-placeholder" />
+    </div>
+    <div class="card-content">
+      <h3 class="post-title-placeholder">{title}</h3>
+      <div class="post-meta-placeholder">
+        <span>Votes: {votes}</span>
+        <span>Comments: {comments}</span>
+        <span>HBD: {hbdPayout}</span>
+        <span>Published: {publishedDate}</span>
+      </div>
     </div>
   </div>
-</div>
+</a>
 
 <style>
+  .home-page-post-card-link {
+    text-decoration: none; /* Remove underline from the link */
+    color: inherit; /* Inherit text color */
+  }
+
+  .home-page-post-card-link:hover .home-page-post-card {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2); /* Add a subtle shadow on hover */
+    transform: translateY(-2px); /* Slightly lift the card on hover */
+    transition: all 0.2s ease-in-out; /* Smooth transition for hover effects */
+  }
+
   .home-page-post-card {
     border: 1px solid #ccc;
     padding: 1rem;

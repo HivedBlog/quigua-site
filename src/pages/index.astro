@@ -90,7 +90,7 @@ const finalCoverUrl = `https://images.hive.blog/u/${hiveUsername}/cover`;
         {
           followedUsersPosts.length > 0 ? (
             followedUsersPosts.map((post) => (
-              <HomePagePostCard {...post} />
+              <HomePagePostCard {...post} permlink={post.permlink} />
             ))
           ) : (
             <p>No posts found from followed users.</p>

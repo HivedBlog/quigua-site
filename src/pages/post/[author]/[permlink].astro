@@ -1,0 +1,95 @@
+---
+import HomeLayout from '../../../layouts/HomeLayout.astro';
+import { condenser_api_get_content, processPostHtml } from 'hiveblogkit';
+
+const { author, permlink } = Astro.params;
+
+let post = null;
+let breadcrumbs = [
+  { label: 'Home', href: '/' }
+];
+
+try {
+  const response = await condenser_api_get_content(author, permlink);
+  if (response && response.result) {
+    post = response.result;
+    post.body = processPostHtml(post.body);
+    breadcrumbs.push({ label: post.title, href: `/post/${author}/${permlink}` });
+  }
+} catch (error) {
+  console.error(`Error fetching post ${author}/${permlink}:`, error);
+}
+
+if (!post) {
+  return Astro.redirect('/404'); // Redirect to a 404 page if post not found
+}
+
+const hiveUsername = post.author; // Or your site's main username if different
+const avatarUrl = `https://images.hive.blog/u/${hiveUsername}/avatar`;
+const finalCoverUrl = `https://images.hive.blog/u/${hiveUsername}/cover`; // Or a default cover
+---
+
+<HomeLayout
+  title={post.title}
+  hiveUsername={hiveUsername}
+  avatarUrl={avatarUrl}
+  finalCoverUrl={finalCoverUrl}
+  breadcrumbs={breadcrumbs}
+>
+  <Fragment slot="posts">
+    <div class="post-detail-container">
+      <h1>{post.title}</h1>
+      <p class="post-meta">By {post.author} on {new Date(post.created).toLocaleDateString()}</p>
+      <div class="post-body" set:html={post.body}></div>
+      <!-- Add more post details as needed -->
+    </div>
+  </Fragment>
+
+  <Fragment slot="sidebar">
+    <!-- You can add a sidebar here with author info, related posts, etc. -->
+    <div class="section-container">
+      <h2>About the Author</h2>
+      <p>Display author details here.</p>
+    </div>
+  </Fragment>
+
+  <Fragment slot="footer">
+    <p>&copy; 2025 Quigua Site. All rights reserved.</p>
+  </Fragment>
+</HomeLayout>
+
+<style is:global>
+  .post-detail-container {
+    padding: 1.5rem;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 1.5rem;
+  }
+  .post-detail-container h1 {
+    color: var(--color-primary);
+    margin-top: 0;
+  }
+  .post-meta {
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 1rem;
+  }
+  .post-body {
+    line-height: 1.6;
+    color: #333;
+  }
+  .post-body img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 1rem auto;
+  }
+  .post-body a {
+    color: var(--color-accent);
+    text-decoration: none;
+  }
+  .post-body a:hover {
+    text-decoration: underline;
+  }
+</style>
