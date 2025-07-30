@@ -1,5 +1,6 @@
 import { defineConfig } from 'astro/config';
 import netlify from '@astrojs/netlify';
+import path from 'path';
 
 export default defineConfig({
   output: 'server',
@@ -7,7 +8,7 @@ export default defineConfig({
   vite: {
     resolve: {
       alias: {
-        'hiveblogkit': '/src/lib/hiveblogkit/index.js',
+        'hiveblogkit': path.resolve('./lib/hiveblogkit/index.js'),
       },
     },
     ssr: {
